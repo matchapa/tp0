@@ -104,6 +104,7 @@ void paquete(int conexion){
 
 	// Leemos y esta vez agregamos las lineas al paquete
 	paquete = crear_paquete();
+	printf("\nIngrese un texto para agregar al paquete (escriba 'exit' para terminar):\n");
 	while(1){
 		leido = readline(">");
 		if(!leido || strcmp(leido, "exit") == 0){
