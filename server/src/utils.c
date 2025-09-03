@@ -6,7 +6,8 @@ int iniciar_servidor(void){
 	int socket_servidor;
 	int err;
 
-	struct addrinfo hints, *servinfo, *p;
+	struct addrinfo hints, *servinfo;
+	// struct addrinfo *p; //No se paa que se utiliza *p
 
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_INET;
@@ -15,7 +16,6 @@ int iniciar_servidor(void){
 
 	err = getaddrinfo(NULL, PUERTO, &hints, &servinfo);
 	if (err != 0) {
-		show_error("getaddrinfo fallo");
 		log_error(logger, "getaddrinfo: %s", gai_strerror(err));
 		abort();
 	}
@@ -26,13 +26,11 @@ int iniciar_servidor(void){
 	// Asociamos el socket a un puerto
 	err = setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEPORT, &(int){1}, sizeof(int));
 	if (err != 0) {
-		show_error("setsockopt fallo");
 		log_error(logger, "setsockopt: %s", strerror(errno));
 		abort();
 	}
 	err = bind(socket_servidor, servinfo->ai_addr, servinfo->ai_addrlen);
 	if (err != 0) {
-		show_error("bind fallo");
 		log_error(logger, "bind: %s", strerror(errno));
 		abort();
 	}
@@ -40,7 +38,6 @@ int iniciar_servidor(void){
 	// Escuchamos las conexiones entrantes
 	err = listen(socket_servidor, SOMAXCONN);
 	if (err != 0) {
-		show_error("listen fallo");
 		log_error(logger, "listen: %s", strerror(errno));
 		abort();
 	}
