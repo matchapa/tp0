@@ -2,12 +2,9 @@
 
 t_log* logger;
 
-int iniciar_servidor(void)
-{
-	// Quitar esta línea cuando hayamos terminado de implementar la funcion
-	assert(!"no implementado!");
-
+int iniciar_servidor(void){
 	int socket_servidor;
+	int err;
 
 	struct addrinfo hints, *servinfo, *p;
 
@@ -16,13 +13,37 @@ int iniciar_servidor(void)
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
 
-	getaddrinfo(NULL, PUERTO, &hints, &servinfo);
+	err = getaddrinfo(NULL, PUERTO, &hints, &servinfo);
+	if (err != 0) {
+		show_error("getaddrinfo fallo");
+		log_error(logger, "getaddrinfo: %s", gai_strerror(err));
+		abort();
+	}
 
 	// Creamos el socket de escucha del servidor
-
+	socket_servidor = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
+	
 	// Asociamos el socket a un puerto
+	err = setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEPORT, &(int){1}, sizeof(int));
+	if (err != 0) {
+		show_error("setsockopt fallo");
+		log_error(logger, "setsockopt: %s", strerror(errno));
+		abort();
+	}
+	err = bind(socket_servidor, servinfo->ai_addr, servinfo->ai_addrlen);
+	if (err != 0) {
+		show_error("bind fallo");
+		log_error(logger, "bind: %s", strerror(errno));
+		abort();
+	}
 
 	// Escuchamos las conexiones entrantes
+	err = listen(socket_servidor, SOMAXCONN);
+	if (err != 0) {
+		show_error("listen fallo");
+		log_error(logger, "listen: %s", strerror(errno));
+		abort();
+	}
 
 	freeaddrinfo(servinfo);
 	log_trace(logger, "Listo para escuchar a mi cliente");
@@ -30,13 +51,16 @@ int iniciar_servidor(void)
 	return socket_servidor;
 }
 
-int esperar_cliente(int socket_servidor)
-{
-	// Quitar esta línea cuando hayamos terminado de implementar la funcion
-	assert(!"no implementado!");
-
+int esperar_cliente(int socket_servidor){
 	// Aceptamos un nuevo cliente
 	int socket_cliente;
+
+	socket_cliente = accept(socket_servidor, NULL, NULL);
+	if(socket_cliente == -1){
+		log_error(logger, "Error al aceptar cliente: %s", strerror(errno));
+		return -1;
+	}
+
 	log_info(logger, "Se conecto un cliente!");
 
 	return socket_cliente;

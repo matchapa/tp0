@@ -7,6 +7,9 @@
 #include<commons/string.h>
 #include<commons/config.h>
 #include<readline/readline.h>
+#include<readline/history.h>
+#include <errno.h>
+
 
 #include "utils.h"
 
